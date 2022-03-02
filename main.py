@@ -3,11 +3,10 @@ from blockchain_stuff import Block, Blockchain
 from config_peers import peers
 from datetime import datetime
 import os
+import ecdsa
 from flask import redirect
 
 AD_FOLDER = os.path.join('..','static', 'ad')
-PRIVATE_KEY_FILE = os.path.join('private_key.txt')
-PUBLIC_KEY_FILE = os.path.join('public_key.txt')
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
@@ -20,24 +19,32 @@ blockchain = Blockchain()
 # form to create new transaction
 @app.route('/')
 def index():
-	#if request.method == 'POST':
-	#	return url_for('process_transaction')
-	#else:
 	path = os.path.join(app.config['UPLOAD_FOLDER'], 'ad_banner.jpg')
 	return render_template("make_transaction.html", filename = path)
 
 # receives form data from '/', generates signature and announces transaction.
 @app.route('/process_transaction', methods= ['GET'])
 def process_transaction():
-	readable_sk = open(PRIVATE_KEY_FILE).read()
+	#generating keys
+	private_key = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1) 
+	public_key = private_key.get_verifying_key()
+
+	#converting to string (for json)
+	public_key = (public_key.to_string()).hex()
+
 	# get the id of the ad banner and add to the message
-	# ad_id = 
-	# pk = 
-	readable_pk = open(PUBLIC_KEY_FILE).read()
+	ad_name = request.args.get('name') # gets from the url, not from page
+	ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+
 	timestamp = str(datetime.now())
-	msg = {'transaction_timestamp': timestamp, 'from_addr': readable_pk}
-	signature = blockchain.generate_signature(readable_sk, msg)
-	signature = signature.hex() #converting bytes type to hex string, so it will be accepted by json.
+	msg = {'transaction_timestamp': timestamp, 'from_addr': public_key, 'ad_name': ad_name, 'ip_address': ip_address}
+
+	#signing with PRIVATE key
+	signature = blockchain.generate_signature(private_key, msg)
+
+	#converting bytes type to hex string, so it will be accepted by json.
+	signature = signature.hex() 
+
 	blockchain.announce_transaction(peers, {'message': msg, 'signature': signature})
 	return "Transaction has been made!"
 

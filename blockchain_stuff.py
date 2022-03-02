@@ -127,12 +127,11 @@ class Blockchain:
 			if peer != request.host_url:
 				response = requests.post(peer+'add_block', json= block_obj.__dict__)
 
-	def generate_signature(self, readable_sk, msg):
+	def generate_signature(self, private_key, msg):
 		# msg is just a transaction dict.
-		# converting from readable format to SigningKey object.
-		sk = SigningKey.from_string(bytes.fromhex(readable_sk), curve=SECP256k1)
-		msg = json.dumps(msg).encode() #to convert msg dict to bytes like object
-		return sk.sign(msg)
+		#to convert msg dict to bytes like object
+		msg = json.dumps(msg).encode() 
+		return private_key.sign(msg)
 
 	def announce_transaction(self, peers, transaction_dict):
 		for peer in peers:
