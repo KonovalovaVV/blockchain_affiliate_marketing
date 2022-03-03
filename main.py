@@ -6,7 +6,8 @@ import os
 import ecdsa
 from flask import redirect
 
-AD_FOLDER = os.path.join('..','static', 'ad')
+AD_FOLDER = os.path.join('static', 'ad')
+print(AD_FOLDER)
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
@@ -19,12 +20,13 @@ blockchain = Blockchain()
 # form to create new transaction
 @app.route('/')
 def index():
-	path = os.path.join(app.config['UPLOAD_FOLDER'], 'ad_banner.jpg')
-	return render_template("make_transaction.html", filename = path)
+
+	return render_template("make_transaction.html")
 
 # receives form data from '/', generates signature and announces transaction.
-@app.route('/process_transaction', methods= ['GET'])
+@app.route('/process_transaction', methods= ['POST'])
 def process_transaction():
+	request.get_json(force=True)
 	#generating keys
 	private_key = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1) 
 	public_key = private_key.get_verifying_key()
@@ -33,7 +35,7 @@ def process_transaction():
 	public_key = (public_key.to_string()).hex()
 
 	# get the id of the ad banner and add to the message
-	ad_name = request.args.get('name') # gets from the url, not from page
+	ad_name = request.json.get('name') # gets from the url, not from page
 	ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
 
 	timestamp = str(datetime.now())
@@ -46,6 +48,7 @@ def process_transaction():
 	signature = signature.hex() 
 
 	blockchain.announce_transaction(peers, {'message': msg, 'signature': signature})
+	print('transaction has been made with - ', ad_name)
 	return "Transaction has been made!"
 
 # to view entire blockchain
