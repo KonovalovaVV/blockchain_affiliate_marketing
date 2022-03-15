@@ -10,6 +10,7 @@ AD_FOLDER = os.path.join('static', 'ad')
 print(AD_FOLDER)
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+amount_of_transactions_to_mine = 5
 
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True #to enable pretty printing with jsonify.
 app.config['JSON_SORT_KEYS'] = False #to not sort while returning json response.
@@ -49,6 +50,8 @@ def process_transaction():
 
 	blockchain.announce_transaction(peers, {'message': msg, 'signature': signature})
 	print('transaction has been made with - ', ad_name)
+	if len(blockchain.unconfirmed_transactions) == amount_of_transactions_to_mine:
+		mining()
 	return "Transaction has been made!"
 
 # to view entire blockchain
@@ -97,6 +100,7 @@ def add_block():
 def add_transaction():
 	transaction_dict = request.get_json()
 	blockchain.unconfirmed_transactions.append(transaction_dict)
+	print(len(blockchain.unconfirmed_transactions))
 	return "Transaction added to unconfirmed_transactions and is ready to be mined!"
 
 # to view peers(all host url's from 'config_peers.py')

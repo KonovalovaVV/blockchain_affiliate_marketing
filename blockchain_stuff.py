@@ -152,4 +152,4 @@ class Blockchain:
 
 	def announce_transaction(self, peers, transaction_dict):
 		for peer in peers:
-			response = requests.post(peer+'add_transaction', json= transaction_dict)
+			response = requests.post(peer + 'add_transaction', json= transaction_dict)
