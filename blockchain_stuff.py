@@ -19,6 +19,12 @@ class Block:
 		block_string = str(self.index) + str(self.block_timestamp) + str(self.transactions) + str(self.prev_hash) + str(self.proof_of_work)
 		return sha256(block_string.encode()).hexdigest()
 
+	@property 
+	def last_transaction(self):
+		if self.transactions:
+			return self.transactions[-1]
+		else:
+			return False
 
 class Blockchain:
 	def __init__(self):
@@ -26,7 +32,8 @@ class Blockchain:
 		self.zeros_difficulty = 2 
 		self.unconfirmed_transactions = []
 		self.chain = []
-		self.genesis_block() #genesis block will be created with initialization.
+		#genesis block will be created with initialization.
+		self.genesis_block() 
 
 	# genesis block is the first block in a blockchain, its prev_hash would be 0
 	def genesis_block(self):
@@ -60,6 +67,12 @@ class Blockchain:
 				if not self.is_valid_transaction(transaction): 
 					self.unconfirmed_transactions.remove(transaction) 
 
+			total_transactions = self.last_block.last_transaction
+			if total_transactions:
+				total_transactions = total_transactions['total_transactions']
+			
+			self.unconfirmed_transactions.append( {'total_transactions': len(self.unconfirmed_transactions) + total_transactions} )
+
 			new_block = Block(index= self.last_block.index + 1, block_timestamp= str(datetime.now()), 
 						transactions= self.unconfirmed_transactions, prev_hash= self.last_block.hash)
 
@@ -75,10 +88,13 @@ class Blockchain:
 	# to verify signature of transaction.
 	def is_valid_transaction(self, transaction_dict):
 		signature = transaction_dict['signature']
-		signature = bytes.fromhex(signature) #converting hex string back to bytes to be able to verify.
+		#converting hex string back to bytes to be able to verify.
+		signature = bytes.fromhex(signature) 
 		public_key = transaction_dict['message']['from_addr']
-		public_key = VerifyingKey.from_string(bytes.fromhex(public_key), curve=SECP256k1) #getting public key in bytes from public key in hex string format.
-		msg = json.dumps(transaction_dict['message']).encode() #converting msg back in bytes format.
+		#getting public key in bytes from public key in hex string format.
+		public_key = VerifyingKey.from_string(bytes.fromhex(public_key), curve=SECP256k1)
+		#converting msg back in bytes format.
+		msg = json.dumps(transaction_dict['message']).encode() 
 		if public_key.verify(signature, msg):
 			return True
 		return False
@@ -115,8 +131,9 @@ class Blockchain:
 				temp_blockchain = self.create_temp_chain(chain)
 				if len(temp_blockchain.chain) > len(longest_chain) and temp_blockchain.is_valid_chain(): 
 					longest_chain = temp_blockchain.chain
-		
-		if longest_chain != self.chain:  #means longest chain is not of current peer's.
+
+		#means longest chain is not of current peer's.
+		if longest_chain != self.chain:  
 			self.chain = longest_chain
 			return True
 		return False

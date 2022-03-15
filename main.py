@@ -17,16 +17,16 @@ app.config['UPLOAD_FOLDER'] = AD_FOLDER
 
 blockchain = Blockchain()
 
-# form to create new transaction
 @app.route('/')
 def index():
-
 	return render_template("make_transaction.html")
 
 # receives form data from '/', generates signature and announces transaction.
 @app.route('/process_transaction', methods= ['POST'])
 def process_transaction():
+
 	request.get_json(force=True)
+
 	#generating keys
 	private_key = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1) 
 	public_key = private_key.get_verifying_key()

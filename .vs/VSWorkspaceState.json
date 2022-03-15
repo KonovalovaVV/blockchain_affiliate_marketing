@@ -1,6 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\static",
+    "\\static\\ad",
+    "\\templates"
   ],
+  "SelectedNode": "\\blockchain_stuff.py",
   "PreviewInSolutionExplorer": false
 }
