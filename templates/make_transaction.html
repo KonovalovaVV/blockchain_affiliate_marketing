@@ -26,16 +26,21 @@
 <!--run chrome without cors "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --disable-gpu --user-data-dir=~/chromeTemp -->
 
 <script>
-    const url = 'http://127.0.0.1:5000/process_transaction'
-    const ads = document.querySelectorAll("button[ad]")
-    console.log(ads)
-    ads.forEach(ad => {
-        ad.onclick = function () {
-            axios.post(url, {
-                name: ad.name
-            })
-        }
-    })
+    const url = "http://127.0.0.1:5000/process_transaction";
+    const ads = document.querySelectorAll("button[ad]");
+    console.log(ads);
+    ads.forEach((ad) => {
+        ad.onclick = function (event) {
+            if (event.isTrusted) {
+                // if (ad.onclick.screenX && ad.onclick.screenX != 0 && ad.onclick.screenY && ad.onclick.screenY != 0) {
+                axios.post(url, {
+                    name: ad.name,
+                });
+            } else {
+                alert("NOT TRUSTED");
+            }
+        };
+    });
 </script>
 
 </html>
