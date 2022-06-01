@@ -4,7 +4,7 @@ In order to increase the trust between vendors in Affiliate Marketing, a blockch
 that it is not a result of automatic actions. The algorithm is developed and applied on a sample webpage. All the basic concepts of blockchain like proof of work, mining, consensus, generating and validating signature on transaction are implemented. 
 
 ## Instructions to run: 
-```
+
 In the ```config_peers.py``` add the mining peers. By default there are:
 ```
 # store all url's running on the network here in string format, so that they can communicate
